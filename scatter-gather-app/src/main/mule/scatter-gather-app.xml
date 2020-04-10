@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="scatter-gather-appFlow" doc:id="4b5795de-2617-4a7c-8765-628456b69536" >
+		<http:listener doc:name="Listener" doc:id="30f0cbe2-ae7e-4ae3-a24d-beb0f9c0c918" config-ref="HTTP_Listener_config_ALL" path="/scatter-gather/{id}"/>
+		<set-variable value="#[attributes.uriParams.id]" doc:name="Set Variable" doc:id="1fb63200-96f1-4d77-81e8-d35e752bafe6" variableName="id"/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="395e2b69-8851-4f45-8ab7-08105836b782" >
+			<route >
+				<flow-ref doc:name="Flow Reference" doc:id="66aba3ca-462e-4cfe-b1a9-0c78fe0303e1" name="getCustomerbByIdFlow"/>
+			</route>
+			<route >
+				<flow-ref doc:name="Flow Reference" doc:id="3b6562bd-d951-4ba1-99e3-6627d0b8a7d9" name="getInvoiceByIdFlow"/>
+			</route>
+			<route >
+				<flow-ref doc:name="Flow Reference" doc:id="4d10d378-48a7-486d-8c84-59bd2c829dea" name="getItemByIdFlow"/>
+			</route>
+			<route >
+				<flow-ref doc:name="Flow Reference" doc:id="07f89713-d587-4035-abc8-efa6b1824d3c" name="getProductByIdFlow"/>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Transform Message" doc:id="c22ba1db-d3e0-4f3c-a224-96fe0bcbc5d5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+flatten(payload...payload)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="6a404883-aa73-407a-aefb-b0bcaf255911" message="#[payload]"/>
+	</flow>
+</mule>
